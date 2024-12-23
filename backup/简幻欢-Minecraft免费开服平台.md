@@ -50,4 +50,4 @@
 
 
 *此文未经允许禁止转载*
-https://blog.meekdai.com/Gmeek/plugins/articletoc.js
+<!-- ##{"script":"<script src='https://blog.meekdai.com/Gmeek/plugins/articletoc.js'></script>"}## -->
