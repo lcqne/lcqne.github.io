@@ -3,13 +3,12 @@
     "subTitle":"欲买桂花同载酒，终不似，少年游",
     "avatarUrl":"http://q.qlogo.cn/headimg_dl?dst_uin=3837108270&spec=640&img_type=jpg",
     "GMEEK_VERSION":"last",
-    "singlePage":["about"],
+    "singlePage":["about,link"],
     "email":"a@lcqne.cn",
     "startSite":"12/23/2024",
     "allHead":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekBSZ.js'></script>",
     "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>" ,
-    "bottomText":"未经允许禁止转载",
-    "singlePage":["link"]
+    "bottomText":"未经允许禁止转载"
     
     
 }
