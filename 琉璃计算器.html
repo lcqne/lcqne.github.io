@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简约计算器</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #calculator {
+            width: 300px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #display {
+            width: 100%;
+            height: 50px;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-align: right;
+            padding: 10px;
+            border: none;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .button {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #d0d0d0;
+        }
+        .operator {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .operator:hover {
+            background-color: #45a049;
+        }
+        .clear {
+            background-color: #f44336;
+            color: white;
+        }
+        .clear:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div id="calculator">
+        <input type="text" id="display" readonly>
+        <div>
+            <button class="button" onclick="clickNumber('7')">7</button>
+            <button class="button" onclick="clickNumber('8')">8</button>
+            <button class="button" onclick="clickNumber('9')">9</button>
+            <button class="button operator" onclick="clickOperator('/')">/</button>
+        </div>
+        <div>
+            <button class="button" onclick="clickNumber('4')">4</button>
+            <button class="button" onclick="clickNumber('5')">5</button>
+            <button class="button" onclick="clickNumber('6')">6</button>
+            <button class="button operator" onclick="clickOperator('*')">*</button>
+        </div>
+        <div>
+            <button class="button" onclick="clickNumber('1')">1</button>
+            <button class="button" onclick="clickNumber('2')">2</button>
+            <button class="button" onclick="clickNumber('3')">3</button>
+            <button class="button operator" onclick="clickOperator('-')">-</button>
+        </div>
+        <div>
+            <button class="button" onclick="clickNumber('0')">0</button>
+            <button class="button" onclick="clickPonit()">.</button>
+            <button class="button" onclick="doCalc()">=</button>
+            <button class="button operator" onclick="clickOperator('+')">+</button>
+        </div>
+        <div>
+            <button class="button clear" onclick="clearresult()">C</button>
+        </div>
+    </div>
+
+    <script>
+        function clickNumber(number) {
+            document.getElementById('display').value += number;
+        }
+
+        function clickOperator(operator) {
+            document.getElementById('display').value += operator;
+        }
+
+        function clickPonit() {
+            if (!document.getElementById('display').value.includes('.')) {
+                document.getElementById('display').value += '.';
+            }
+        }
+
+        function clearresult() {
+            document.getElementById('display').value = '';
+        }
+
+        function doCalc() {
+            try {
+                document.getElementById('display').value = eval(document.getElementById('display').value);
+            } catch (e) {
+                document.getElementById('display').value = 'Error';
+            }
+        }
+    </script>
+</body>
+</html>
