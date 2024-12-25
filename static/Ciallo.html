@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飘着的Ciallo～(∠・ω< )⌒☆</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+        .text {
+            position: absolute;
+            font-size: 2em;
+            white-space: nowrap;
+            animation: float 5s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const colors = ['#ff69b4', '#00ff00', '#00ffff', '#ff00ff', '#ffff00', '#0000ff'];
+        const text = 'Ciallo～(∠・ω< )⌒☆';
+
+        function createTextElement(color, delay) {
+            const element = document.createElement('div');
+            element.className = 'text';
+            element.style.color = color;
+            element.style.animationDelay = `${delay}s`;
+            element.textContent = text;
+            document.body.appendChild(element);
+
+            // 随机位置
+            const x = Math.random() * (window.innerWidth - element.offsetWidth);
+            const y = Math.random() * (window.innerHeight - element.offsetHeight);
+            element.style.left = `${x}px`;
+            element.style.top = `${y}px`;
+        }
+
+        for (let i = 0; i < 10; i++) {
+            const color = colors[i % colors.length];
+            const delay = Math.random() * 5;
+            createTextElement(color, delay);
+        }
+    </script>
+</body>
+</html>
