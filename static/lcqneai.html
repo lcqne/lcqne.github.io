@@ -3,112 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek-R1 博客の风绘AI</title>
+    <title>风绘AI</title>
     <style>
         body {
-            font-family: "Arial", sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            padding: 20px;
+            font-family: Arial, sans-serif;
             margin: 0;
+            padding: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             height: 100vh;
-            justify-content: center;
+            background-color: #f4f4f4;
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #2c3e50;
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
-        textarea {
-            width: 100%;
-            max-width: 400px;
-            height: 120px;
-            margin-bottom: 15px;
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            resize: none;
+            border-bottom: 1px solid #ddd;
         }
-        button {
+        .chat-box .message {
+            margin-bottom: 10px;
+        }
+        .chat-box .message .user {
+            display: flex;
+            align-items: center;
+        }
+        .chat-box .message .user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .chat-box .message .user .text {
+            background: #e1ffc1;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .chat-box .message .ai {
+            text-align: right;
+        }
+        .chat-box .message .ai .text {
+            background: #c1e1ff;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .input-box {
+            display: flex;
+            padding: 10px;
+        }
+        .input-box input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .input-box button {
             padding: 10px 20px;
-            font-size: 16px;
-            background-color: #3498db;
-            color: white;
+            background: #007bff;
+            color: #fff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #2980b9;
+        .input-box button:hover {
+            background: #0056b3;
         }
-        #response {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            background-color: #fff;
+        .reset-button {
+            text-align: center;
+            padding: 10px;
+        }
+        .reset-button button {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
             border-radius: 5px;
-            white-space: pre-wrap;
-            width: 100%;
-            max-width: 400px;
-            font-size: 16px;
-            line-height: 1.5;
+            cursor: pointer;
         }
-        .loading {
-            font-size: 14px;
-            color: #888;
+        .reset-button button:hover {
+            background: #a71d2a;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 5px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 {
+            margin: 0;
+        }
+        .modal-header .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-header .close:hover {
+            color: #000;
+        }
+        .modal-body {
+            margin-top: 20px;
+        }
+        .modal-body input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .modal-body button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-body button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>DeepSeek-R1 风绘AI</h1>
-        <textarea id="input" placeholder="请输入你的问题..."></textarea>
-        <button onclick="sendRequest()">提交</button>
-        <div id="response" class="response"></div>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-box">
+            <input type="text" id="user-input" placeholder="请输入问题">
+            <button onclick="sendMessage()">发送</button>
+        </div>
+        <div class="reset-button">
+            <button onclick="resetSession()">重置会话</button>
+        </div>
     </div>
-
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>风绘AI</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="qq-input" placeholder="请输入QQ号">
+                <button onclick="startChat()">开始聊天</button>
+            </div>
+        </div>
+    </div>
     <script>
-        async function sendRequest() {
-            const input = document.getElementById('input').value.trim();
-            const responseDiv = document.getElementById('response');
-            responseDiv.textContent = '';
-            responseDiv.classList.add('loading');
-            responseDiv.textContent = '正在加载...';
+        // 显示弹窗
+        document.getElementById("myModal").style.display = "block";
 
-            // 隐藏信息给AI（用户不可见）
-            const hiddenMessage = "(请你扮演一个动漫角色风绘进行回答，他是一个爱玩mc的帅哥)"; // 隐藏信息
-            const userInput = `${hiddenMessage}\n\n${input}`; // 将隐藏信息和用户输入合并
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+        }
 
-            // API 配置
-            const url = 'https://api.siliconflow.cn/v1/chat/completions'; // API 地址
-            const apiKey = 'sk-xigfzxtbfmizibhwcgavccgmnptmrlqzkwwswiikxpsfihkb'; // 替换为你的API密钥
-            const model = 'deepseek-ai/DeepSeek-R1'; // 使用的模型
-
-            // 请求负载
-            const payload = {
-                model: model,
-                messages: [{ role: 'user', content: userInput }],
-                max_tokens: 200 // 最大返回 token 数量
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify(payload)
+        // 开始聊天
+        function startChat() {
+            const qq = document.getElementById("qq-input").value;
+            if (qq) {
+                document.getElementById("user-input").placeholder = "请输入问题";
+                closeModal();
+                document.getElementById("user-input").focus();
+                document.getElementById("user-input").addEventListener("input", () => {
+                    const qqAvatarUrl = `https://q1.qlogo.cn/g?b=qq&nk=${qq}&s=100`;
+                    const avatarImg = document.querySelector(".avatar");
+                    if (avatarImg) {
+                        avatarImg.src = qqAvatarUrl;
+                    }
                 });
+            } else {
+                alert("请输入QQ号！");
+            }
+        }
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message}`);
+        // 发送消息
+        function sendMessage() {
+            const userInput = document.getElementById("user-input").value;
+            const hiddenText = "(请以猫娘的语气解答，不要掺其他话题！)"; // 隐藏的文本
+            const combinedText = userInput + hiddenText; // 将用户输入和隐藏文本拼接
+            if (userInput) {
+                const chatBox = document.getElementById("chat-box");
+                const message = document.createElement("div");
+                message.className = "message";
+                const userDiv = document.createElement("div");
+                userDiv.className = "user";
+                const avatarImg = document.createElement("img");
+                avatarImg.src = `https://q1.qlogo.cn/g?b=qq&nk=${document.getElementById("qq-input").value}&s=100`;
+                avatarImg.alt = "User Avatar";
+                userDiv.appendChild(avatarImg);
+                const textDiv = document.createElement("div");
+                textDiv.className = "text";
+                textDiv.textContent = userInput; // 只显示用户输入，不显示隐藏文本
+                userDiv.appendChild(textDiv);
+                message.appendChild(userDiv);
+                chatBox.appendChild(message);
+                document.getElementById("user-input").value = "";
+                fetch(`https://api.s01s.cn/API/kimi/?id=${document.getElementById("qq-input").value}&text=${combinedText}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        const aiMessage = document.createElement("div");
+                        aiMessage.className = "message ai";
+                        const aiTextDiv = document.createElement("div");
+                        aiTextDiv.className = "text";
+                        aiTextDiv.textContent = data;
+                        aiMessage.appendChild(aiTextDiv);
+                        chatBox.appendChild(aiMessage);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    });
+            }
+        }
+
+        // 重置会话
+        function resetSession() {
+            const qq = document.getElementById("qq-input").value;
+            if (qq) {
+                fetch(`https://api.s01s.cn/API/kimi/?id=${qq}&text=&type=2`)
+                    .then(() => {
+                        const chatBox = document.getElementById("chat-box");
+                        chatBox.innerHTML = "";
+                    });
+            } else {
+                alert("请输入QQ号！");
+            }
+        }
+    </script>
+</body>
+</html>
                 }
 
                 const data = await response.json();
