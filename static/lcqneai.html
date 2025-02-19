@@ -3,117 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>风绘AI</title>
+    <title>AI Chat with Context</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 20px;
         }
         #chat-box {
             width: 100%;
             max-width: 600px;
+            margin: auto;
             border: 1px solid #ccc;
             padding: 10px;
-            margin-bottom: 10px;
-            height: 300px;
-            overflow-y: auto;
-            word-wrap: break-word;
+            border-radius: 5px;
         }
-        #input-container {
-            display: flex;
+        #chat-box textarea {
             width: 100%;
-            max-width: 600px;
+            height: 100px;
+            margin-bottom: 10px;
         }
-        #user-input {
-            flex: 1;
-            margin-right: 10px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
+        #chat-box button {
+            padding: 5px 10px;
+            background-color: #007BFF;
             color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
+        #chat-box button:hover {
             background-color: #0056b3;
         }
-        #avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 25px;
-            margin-bottom: 10px;
+        #chat-history {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: scroll;
         }
     </style>
 </head>
 <body>
-    <h1>风绘AI</h1>
-    <div id="chat-box"></div>
-    <div id="input-container">
-        <input type="text" id="user-input" placeholder="请输入问题">
-        <button onclick="sendMessage()">发送</button>
+    <div id="chat-box">
+        <textarea id="input-text" placeholder="请输入您的问题..."></textarea>
+        <button id="send-button">发送</button>
     </div>
-    <img id="avatar" src="" alt="QQ头像">
+    <div id="chat-history">
+        <p>聊天记录：</p>
+    </div>
+
     <script>
-        let qq = '';
-        let chatHistory = [];
+        // 获取用户输入的QQ号码
+        let qq = prompt("请输入您的QQ号码：");
+        if (!qq) {
+            alert("未输入QQ号码，无法使用聊天功能！");
+            document.getElementById("send-button").disabled = true;
+        }
 
-        // 弹窗获取QQ号
-        const qqPrompt = () => {
-            qq = prompt('请输入您的QQ号，需要QQ作为上下文支持');
-            if (!qq) {
-                alert('QQ号不能为空，请重新输入');
-                qqPrompt();
-            } else {
-                document.getElementById('avatar').src = `https://q1.qlogo.cn/g?b=qq&nk=${qq}&s=100`;
-            }
-        };
-        qqPrompt();
-
-        const sendMessage = () => {
-            const userInput = document.getElementById('user-input').value.trim();
-            if (!userInput) {
-                alert('请输入问题');
+        document.getElementById("send-button").addEventListener("click", function() {
+            let inputText = document.getElementById("input-text").value.trim();
+            if (!inputText) {
+                alert("请输入问题！");
                 return;
             }
 
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `<p><strong>用户：</strong>${userInput}</p>`;
-            chatHistory.push({ role: 'user', text: userInput });
+            // 构造请求URL
+            let apiUrl = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(inputText)}`;
 
-            // 添加隐藏文本，但不显示在聊天记录中
-            const hiddenMessage = "（你现在是一个名为风绘的猫娘AI，请用猫娘的语气解答问题，括号内的话不用回应）";
-            const fullMessage = userInput + hiddenMessage;
-
-            const apiURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(fullMessage)}`;
-            fetch(apiURL)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
+            // 发送请求
+            fetch(apiUrl)
+                .then(response => response.text())
                 .then(data => {
-                    chatBox.innerHTML += `<p><strong>风绘AI：</strong>${data}</p>`;
-                    chatHistory.push({ role: 'assistant', text: data });
-                    chatBox.scrollTop = chatBox.scrollHeight;
+                    // 显示结果
+                    let chatHistory = document.getElementById("chat-history");
+                    chatHistory.innerHTML += `<p><strong>用户：</strong>${inputText}</p>`;
+                    chatHistory.innerHTML += `<p><strong>AI：</strong>${data}</p>`;
+                    document.getElementById("input-text").value = ""; // 清空输入框
                 })
                 .catch(error => {
-                    chatBox.innerHTML += `<p><strong>风绘AI：</strong>服务器繁忙，请稍后再试。</p>`;
-                    chatBox.scrollTop = chatBox.scrollHeight;
+                    console.error("请求失败：", error);
+                    alert("请求失败，请稍后重试！");
                 });
-
-            document.getElementById('user-input').value = '';
-        };
+        });
     </script>
 </body>
 </html>
