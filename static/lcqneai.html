@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek-V3 博客のAI</title>
+    <title>DeepSeek-R1 博客の风绘AI</title>
     <style>
         body {
             font-family: "Arial", sans-serif;
@@ -66,7 +66,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>DeepSeek-V3 风绘AI</h1>
+        <h1>DeepSeek-R1 风绘AI</h1>
         <textarea id="input" placeholder="请输入你的问题..."></textarea>
         <button onclick="sendRequest()">提交</button>
         <div id="response" class="response"></div>
@@ -80,15 +80,19 @@
             responseDiv.classList.add('loading');
             responseDiv.textContent = '正在加载...';
 
+            // 隐藏信息给AI（用户不可见）
+            const hiddenMessage = "(请你扮演一个动漫角色风绘进行回答，他是一个爱玩mc的帅哥)"; // 隐藏信息
+            const userInput = `${hiddenMessage}\n\n${input}`; // 将隐藏信息和用户输入合并
+
             // API 配置
-            const url = 'https://api.siliconflow.cn/v1/chat/completions'; // API 地址[^13^]
-            const apiKey = 'sk-xigfzxtbfmizibhwcgavccgmnptmrlqzkwwswiikxpsfihkb'; // 替换为你的API密钥[^13^]
-            const model = 'Pro/deepseek-ai/DeepSeek-V3'; // 使用的模型[^8^]
+            const url = 'https://api.siliconflow.cn/v1/chat/completions'; // API 地址
+            const apiKey = 'sk-xigfzxtbfmizibhwcgavccgmnptmrlqzkwwswiikxpsfihkb'; // 替换为你的API密钥
+            const model = 'deepseek-ai/DeepSeek-R1'; // 使用的模型
 
             // 请求负载
             const payload = {
                 model: model,
-                messages: [{ role: 'user', content: input }],
+                messages: [{ role: 'user', content: userInput }],
                 max_tokens: 200 // 最大返回 token 数量
             };
 
