@@ -3,83 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI交互页面</title>
+    <title>DeepSeekAI问答</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        textarea, input {
-            width: 100%;
-            margin-bottom: 10px;
-        }
         textarea {
+            width: 100%;
             height: 100px;
+            margin-bottom: 10px;
         }
         button {
             padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .output {
+        #response {
             margin-top: 20px;
             padding: 10px;
+            border: 1px solid #ccc;
             background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        }
+        #loading {
+            display: none;
+            margin-top: 10px;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>AI交互页面</h1>
-        <form id="aiForm">
-            <label for="qqNumber">请输入你的QQ号：</label><br>
-            <input type="text" id="qqNumber" name="qqNumber" placeholder="请输入QQ号" required><br>
-            <label for="inputText">请输入你的问题：</label><br>
-            <textarea id="inputText" name="inputText" placeholder="在这里输入你的问题..."></textarea><br>
-            <button type="button" onclick="sendRequest()">提交</button>
-        </form>
-        <div class="output" id="outputText"></div>
-    </div>
-
     <script>
-        async function sendRequest() {
-            const qqNumber = document.getElementById('qqNumber').value;
-            const inputText = document.getElementById('inputText').value;
-            const outputText = document.getElementById('outputText');
+        function sendRequest() {
+            const userMessage = document.getElementById('userMessage').value;
+            const data = {
+                messages: [
+                    { "role": "system", "content": "You are a helpful assistant." },
+                    { "role": "user", "content": userMessage }
+                ]
+            };
 
-            if (!qqNumber.trim() || !inputText.trim()) {
-                outputText.innerHTML = '<p style="color: red;">请输入QQ号和问题！</p>';
-                return;
-            }
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('response').textContent = '';
 
-            try {
-                const response = await fetch(`https://api.s01s.cn/API/kimi/?id=${encodeURIComponent(qqNumber)}&text=${encodeURIComponent(inputText)}`);
-                const data = await response.json();
-
-                if (data && data.message) {
-                    outputText.innerHTML = `<p>${data.message}</p>`;
-                } else {
-                    outputText.innerHTML = '<p style="color: red;">没有收到有效回复！</p>';
+            fetch('https://api.pearktrue.cn/api/deepseek/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-            } catch (error) {
-                outputText.innerHTML = `<p style="color: red;">请求失败：${error.message}</p>`;
-            }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('response').textContent = data.message;
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = '请求失败：' + error.message;
+                document.getElementById('loading').style.display = 'none';
+            });
         }
     </script>
+</head>
+<body>
+    <h1>DeepSeekAI问答</h1>
+    <textarea id="userMessage" placeholder="输入你的问题..."></textarea><br>
+    <button onclick="sendRequest()">发送</button>
+    <div id="loading">加载中...</div>
+    <h2>AI的回答：</h2>
+    <p id="response"></p>
 </body>
 </html>
