@@ -7,277 +7,78 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
+            margin: 20px;
         }
-        .container {
-            width: 80%;
-            max-width: 600px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        .chat-box {
-            height: 400px;
-            overflow-y: auto;
+        #chat-box {
+            border: 1px solid #ccc;
             padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .chat-box .message {
             margin-bottom: 10px;
+            height: 300px;
+            overflow-y: scroll;
         }
-        .chat-box .message .user {
-            display: flex;
-            align-items: center;
+        #user-input {
+            width: calc(100% - 110px);
         }
-        .chat-box .message .user img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .chat-box .message .user .text {
-            background: #e1ffc1;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .chat-box .message .ai {
-            text-align: right;
-        }
-        .chat-box .message .ai .text {
-            background: #c1e1ff;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .input-box {
-            display: flex;
-            padding: 10px;
-        }
-        .input-box input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-        .input-box button {
-            padding: 10px 20px;
-            background: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .input-box button:hover {
-            background: #0056b3;
-        }
-        .reset-button {
-            text-align: center;
-            padding: 10px;
-        }
-        .reset-button button {
-            padding: 10px 20px;
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .reset-button button:hover {
-            background: #a71d2a;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            padding-top: 100px;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            border-radius: 5px;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header h2 {
-            margin: 0;
-        }
-        .modal-header .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .modal-header .close:hover {
-            color: #000;
-        }
-        .modal-body {
-            margin-top: 20px;
-        }
-        .modal-body input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        .modal-body button {
-            padding: 10px 20px;
-            background: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .modal-body button:hover {
-            background: #0056b3;
+        #avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="chat-box" id="chat-box"></div>
-        <div class="input-box">
-            <input type="text" id="user-input" placeholder="请输入问题">
-            <button onclick="sendMessage()">发送</button>
-        </div>
-        <div class="reset-button">
-            <button onclick="resetSession()">重置会话</button>
-        </div>
-    </div>
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>风绘AI</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="qq-input" placeholder="请输入QQ号">
-                <button onclick="startChat()">开始聊天</button>
-            </div>
-        </div>
-    </div>
+    <h1>风绘AI</h1>
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="请输入问题">
+    <button onclick="sendMessage()">发送</button>
+    <button onclick="resetSession()">重置会话</button>
+    <img id="avatar" src="" alt="QQ头像">
     <script>
-        // 显示弹窗
-        document.getElementById("myModal").style.display = "block";
+        let qq = '';
+        let chatHistory = [];
 
-        // 关闭弹窗
-        function closeModal() {
-            document.getElementById("myModal").style.display = "none";
-        }
+        // 弹窗获取QQ号
+        const qqPrompt = () => {
+            qq = prompt('请输入您的QQ号');
+            if (!qq) {
+                alert('QQ号不能为空，请重新输入');
+                qqPrompt();
+            } else {
+                document.getElementById('avatar').src = `https://q1.qlogo.cn/g?b=qq&nk=${qq}&s=100`;
+            }
+        };
+        qqPrompt();
 
-        // 开始聊天
-        function startChat() {
-            const qq = document.getElementById("qq-input").value;
-            if (qq) {
-                document.getElementById("user-input").placeholder = "请输入问题";
-                closeModal();
-                document.getElementById("user-input").focus();
-                document.getElementById("user-input").addEventListener("input", () => {
-                    const qqAvatarUrl = `https://q1.qlogo.cn/g?b=qq&nk=${qq}&s=100`;
-                    const avatarImg = document.querySelector(".avatar");
-                    if (avatarImg) {
-                        avatarImg.src = qqAvatarUrl;
-                    }
+        const sendMessage = () => {
+            const userInput = document.getElementById('user-input').value;
+            if (!userInput) {
+                alert('请输入问题');
+                return;
+            }
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<p><strong>用户：</strong>${userInput}</p>`;
+            chatHistory.push({ role: 'user', text: userInput });
+
+            const apiURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(userInput)}`;
+            fetch(apiURL)
+                .then(response => response.text())
+                .then(data => {
+                    chatBox.innerHTML += `<p><strong>风绘AI：</strong>${data}</p>`;
+                    chatHistory.push({ role: 'assistant', text: data });
+                    chatBox.scrollTop = chatBox.scrollHeight;
                 });
-            } else {
-                alert("请输入QQ号！");
-            }
-        }
+            document.getElementById('user-input').value = '';
+        };
 
-        // 发送消息
-        function sendMessage() {
-            const userInput = document.getElementById("user-input").value;
-            const hiddenText = "(请以猫娘的语气解答，不要掺其他话题！)"; // 隐藏的文本
-            const combinedText = userInput + hiddenText; // 将用户输入和隐藏文本拼接
-            if (userInput) {
-                const chatBox = document.getElementById("chat-box");
-                const message = document.createElement("div");
-                message.className = "message";
-                const userDiv = document.createElement("div");
-                userDiv.className = "user";
-                const avatarImg = document.createElement("img");
-                avatarImg.src = `https://q1.qlogo.cn/g?b=qq&nk=${document.getElementById("qq-input").value}&s=100`;
-                avatarImg.alt = "User Avatar";
-                userDiv.appendChild(avatarImg);
-                const textDiv = document.createElement("div");
-                textDiv.className = "text";
-                textDiv.textContent = userInput; // 只显示用户输入，不显示隐藏文本
-                userDiv.appendChild(textDiv);
-                message.appendChild(userDiv);
-                chatBox.appendChild(message);
-                document.getElementById("user-input").value = "";
-                fetch(`https://api.s01s.cn/API/kimi/?id=${document.getElementById("qq-input").value}&text=${combinedText}`)
-                    .then(response => response.text())
-                    .then(data => {
-                        const aiMessage = document.createElement("div");
-                        aiMessage.className = "message ai";
-                        const aiTextDiv = document.createElement("div");
-                        aiTextDiv.className = "text";
-                        aiTextDiv.textContent = data;
-                        aiMessage.appendChild(aiTextDiv);
-                        chatBox.appendChild(aiMessage);
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    });
-            }
-        }
-
-        // 重置会话
-        function resetSession() {
-            const qq = document.getElementById("qq-input").value;
-            if (qq) {
-                fetch(`https://api.s01s.cn/API/kimi/?id=${qq}&text=&type=2`)
-                    .then(() => {
-                        const chatBox = document.getElementById("chat-box");
-                        chatBox.innerHTML = "";
-                    });
-            } else {
-                alert("请输入QQ号！");
-            }
-        }
-    </script>
-</body>
-</html>
-                }
-
-                const data = await response.json();
-                const reply = data.choices[0].message.content; // 获取回复内容
-                const totalTokens = data.usage.total_tokens; // 获取消耗的 Tokens
-                const modelUsed = data.model; // 获取使用的模型
-
-                // 构造显示内容
-                const output = `
-                    <strong>模型:</strong> ${modelUsed}<br>
-                    <strong>消耗 Tokens:</strong> ${totalTokens}<br><br>
-                    <strong>回复:</strong><br>${reply}
-                `;
-
-                responseDiv.innerHTML = output;
-                responseDiv.classList.remove('loading');
-            } catch (error) {
-                responseDiv.textContent = `出错：${error.message}`;
-                responseDiv.classList.remove('loading');
-            }
-        }
+        const resetSession = () => {
+            const resetURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=重置会话&type=2`;
+            fetch(resetURL)
+                .then(() => {
+                    chatHistory = [];
+                    document.getElementById('chat-box').innerHTML = '';
+                    alert('会话已重置');
+                });
+        };
     </script>
 </body>
 </html>
