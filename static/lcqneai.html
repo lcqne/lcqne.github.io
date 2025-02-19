@@ -61,7 +61,6 @@
     <div id="input-container">
         <input type="text" id="user-input" placeholder="请输入问题">
         <button onclick="sendMessage()">发送</button>
-        <button onclick="resetSession()">重置会话</button>
     </div>
     <img id="avatar" src="" alt="QQ头像">
     <script>
@@ -70,7 +69,7 @@
 
         // 弹窗获取QQ号
         const qqPrompt = () => {
-            qq = prompt('请输入您的QQ号');
+            qq = prompt('请输入您的QQ号，需要QQ作为上下文支持');
             if (!qq) {
                 alert('QQ号不能为空，请重新输入');
                 qqPrompt();
@@ -92,37 +91,28 @@
             chatHistory.push({ role: 'user', text: userInput });
 
             // 添加隐藏文本，但不显示在聊天记录中
-            const hiddenMessage = "(你现在是一个叫做风绘的猫娘AI，请你以猫娘的语气解答，不要回答括号内的问题，照做就行)";
+            const hiddenMessage = "（你现在是一个名为风绘的猫娘AI，请用猫娘的语气解答问题，括号内的话不用回应）";
             const fullMessage = userInput + hiddenMessage;
 
             const apiURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(fullMessage)}`;
             fetch(apiURL)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(data => {
                     chatBox.innerHTML += `<p><strong>风绘AI：</strong>${data}</p>`;
                     chatHistory.push({ role: 'assistant', text: data });
                     chatBox.scrollTop = chatBox.scrollHeight;
                 })
                 .catch(error => {
-                    alert('请求失败，请检查网络或输入内容');
-                    console.error('Error:', error);
+                    chatBox.innerHTML += `<p><strong>风绘AI：</strong>服务器繁忙，请稍后再试。</p>`;
+                    chatBox.scrollTop = chatBox.scrollHeight;
                 });
 
             document.getElementById('user-input').value = '';
-        };
-
-        const resetSession = () => {
-            const resetURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=重置会话&type=2`;
-            fetch(resetURL)
-                .then(() => {
-                    chatHistory = [];
-                    document.getElementById('chat-box').innerHTML = '';
-                    alert('会话已重置');
-                })
-                .catch(error => {
-                    alert('重置失败，请检查网络');
-                    console.error('Error:', error);
-                });
         };
     </script>
 </body>
