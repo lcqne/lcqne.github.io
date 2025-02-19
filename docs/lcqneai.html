@@ -3,88 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat with Context</title>
+    <title>AI交互页面</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
+            margin: 20px;
         }
-        #chat-box {
-            width: 100%;
+        .container {
             max-width: 600px;
             margin: auto;
+            padding: 20px;
             border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
         }
-        #chat-box textarea {
+        textarea, input {
             width: 100%;
-            height: 100px;
             margin-bottom: 10px;
         }
-        #chat-box button {
-            padding: 5px 10px;
+        textarea {
+            height: 100px;
+        }
+        button {
+            padding: 10px 20px;
             background-color: #007BFF;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
         }
-        #chat-box button:hover {
+        button:hover {
             background-color: #0056b3;
         }
-        #chat-history {
+        .output {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            height: 200px;
-            overflow-y: scroll;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div id="chat-box">
-        <textarea id="input-text" placeholder="请输入您的问题..."></textarea>
-        <button id="send-button">发送</button>
-    </div>
-    <div id="chat-history">
-        <p>聊天记录：</p>
+    <div class="container">
+        <h1>AI交互页面</h1>
+        <form id="aiForm">
+            <label for="qqNumber">请输入你的QQ号：</label><br>
+            <input type="text" id="qqNumber" name="qqNumber" placeholder="请输入QQ号" required><br>
+            <label for="inputText">请输入你的问题：</label><br>
+            <textarea id="inputText" name="inputText" placeholder="在这里输入你的问题..."></textarea><br>
+            <button type="button" onclick="sendRequest()">提交</button>
+        </form>
+        <div class="output" id="outputText"></div>
     </div>
 
     <script>
-        // 获取用户输入的QQ号码
-        let qq = prompt("请输入您的QQ号码：");
-        if (!qq) {
-            alert("未输入QQ号码，无法使用聊天功能！");
-            document.getElementById("send-button").disabled = true;
-        }
+        async function sendRequest() {
+            const qqNumber = document.getElementById('qqNumber').value;
+            const inputText = document.getElementById('inputText').value;
+            const outputText = document.getElementById('outputText');
 
-        document.getElementById("send-button").addEventListener("click", function() {
-            let inputText = document.getElementById("input-text").value.trim();
-            if (!inputText) {
-                alert("请输入问题！");
+            if (!qqNumber.trim() || !inputText.trim()) {
+                outputText.innerHTML = '<p style="color: red;">请输入QQ号和问题！</p>';
                 return;
             }
 
-            // 构造请求URL
-            let apiUrl = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(inputText)}`;
+            try {
+                const response = await fetch(`https://api.s01s.cn/API/kimi/?id=${encodeURIComponent(qqNumber)}&text=${encodeURIComponent(inputText)}`);
+                const data = await response.json();
 
-            // 发送请求
-            fetch(apiUrl)
-                .then(response => response.text())
-                .then(data => {
-                    // 显示结果
-                    let chatHistory = document.getElementById("chat-history");
-                    chatHistory.innerHTML += `<p><strong>用户：</strong>${inputText}</p>`;
-                    chatHistory.innerHTML += `<p><strong>AI：</strong>${data}</p>`;
-                    document.getElementById("input-text").value = ""; // 清空输入框
-                })
-                .catch(error => {
-                    console.error("请求失败：", error);
-                    alert("请求失败，请稍后重试！");
-                });
-        });
+                if (data && data.message) {
+                    outputText.innerHTML = `<p>${data.message}</p>`;
+                } else {
+                    outputText.innerHTML = '<p style="color: red;">没有收到有效回复！</p>';
+                }
+            } catch (error) {
+                outputText.innerHTML = `<p style="color: red;">请求失败：${error.message}</p>`;
+            }
+        }
     </script>
 </body>
 </html>
