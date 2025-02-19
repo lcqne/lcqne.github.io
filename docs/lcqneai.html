@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek-V3 博客のAI</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        textarea {
+            width: 100%;
+            max-width: 400px;
+            height: 120px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            width: 100%;
+            max-width: 400px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .loading {
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DeepSeek-V3 风绘AI</h1>
+        <textarea id="input" placeholder="请输入你的问题..."></textarea>
+        <button onclick="sendRequest()">提交</button>
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        async function sendRequest() {
+            const input = document.getElementById('input').value.trim();
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = '';
+            responseDiv.classList.add('loading');
+            responseDiv.textContent = '正在加载...';
+
+            // API 配置
+            const url = 'https://api.siliconflow.cn/v1/chat/completions'; // API 地址[^13^]
+            const apiKey = 'sk-xigfzxtbfmizibhwcgavccgmnptmrlqzkwwswiikxpsfihkb'; // 替换为你的API密钥[^13^]
+            const model = 'Pro/deepseek-ai/DeepSeek-V3'; // 使用的模型[^8^]
+
+            // 请求负载
+            const payload = {
+                model: model,
+                messages: [{ role: 'user', content: input }],
+                max_tokens: 200 // 最大返回 token 数量
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message}`);
+                }
+
+                const data = await response.json();
+                const reply = data.choices[0].message.content; // 获取回复内容
+                const totalTokens = data.usage.total_tokens; // 获取消耗的 Tokens
+                const modelUsed = data.model; // 获取使用的模型
+
+                // 构造显示内容
+                const output = `
+                    <strong>模型:</strong> ${modelUsed}<br>
+                    <strong>消耗 Tokens:</strong> ${totalTokens}<br><br>
+                    <strong>回复:</strong><br>${reply}
+                `;
+
+                responseDiv.innerHTML = output;
+                responseDiv.classList.remove('loading');
+            } catch (error) {
+                responseDiv.textContent = `出错：${error.message}`;
+                responseDiv.classList.remove('loading');
+            }
+        }
+    </script>
+</body>
+</html>
