@@ -53,6 +53,9 @@
             border-radius: 25px;
             margin-bottom: 10px;
         }
+        #loading {
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -61,15 +64,17 @@
     <div id="input-container">
         <input type="text" id="user-input" placeholder="请输入问题">
         <button onclick="sendMessage()">发送</button>
+        <button onclick="resetSession()">重置会话</button>
     </div>
     <img id="avatar" src="" alt="QQ头像">
+    <div id="loading" style="display:none;">思考中...</div>
     <script>
         let qq = '';
         let chatHistory = [];
 
         // 弹窗获取QQ号
         const qqPrompt = () => {
-            qq = prompt('请输入您的QQ号，需要QQ作为上下文支持');
+            qq = prompt('请输入您的QQ号，可获取上下文');
             if (!qq) {
                 alert('QQ号不能为空，请重新输入');
                 qqPrompt();
@@ -90,6 +95,9 @@
             chatBox.innerHTML += `<p><strong>用户：</strong>${userInput}</p>`;
             chatHistory.push({ role: 'user', text: userInput });
 
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
             // 添加隐藏文本，但不显示在聊天记录中
             const hiddenMessage = "（你现在是一个名为风绘的猫娘AI，请用猫娘的语气解答问题，括号内的话不用回应）";
             const fullMessage = userInput + hiddenMessage;
@@ -100,6 +108,7 @@
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
+                    loading.style.display = 'none';
                     return response.text();
                 })
                 .then(data => {
@@ -108,11 +117,20 @@
                     chatBox.scrollTop = chatBox.scrollHeight;
                 })
                 .catch(error => {
-                    chatBox.innerHTML += `<p><strong>风绘AI：</strong>服务器繁忙，请稍后再试。</p>`;
+                    loading.style.display = 'none';
+                    chatBox.innerHTML += `<p><strong>风绘AI：</strong>请求繁忙</p>`;
                     chatBox.scrollTop = chatBox.scrollHeight;
                 });
 
             document.getElementById('user-input').value = '';
+        };
+
+        const resetSession = () => {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+            document.getElementById('user-input').value = '';
+            document.getElementById('loading').style.display = 'none';
+            alert('会话已重置');
         };
     </script>
 </body>
