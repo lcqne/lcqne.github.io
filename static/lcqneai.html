@@ -8,30 +8,61 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         #chat-box {
+            width: 100%;
+            max-width: 600px;
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 10px;
             height: 300px;
-            overflow-y: scroll;
+            overflow-y: auto;
+            word-wrap: break-word;
+        }
+        #input-container {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
         }
         #user-input {
-            width: calc(100% - 110px);
+            flex: 1;
+            margin-right: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
         #avatar {
             width: 50px;
             height: 50px;
             border-radius: 25px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <h1>风绘AI</h1>
     <div id="chat-box"></div>
-    <input type="text" id="user-input" placeholder="请输入问题">
-    <button onclick="sendMessage()">发送</button>
-    <button onclick="resetSession()">重置会话</button>
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="请输入问题">
+        <button onclick="sendMessage()">发送</button>
+        <button onclick="resetSession()">重置会话</button>
+    </div>
     <img id="avatar" src="" alt="QQ头像">
     <script>
         let qq = '';
@@ -50,23 +81,33 @@
         qqPrompt();
 
         const sendMessage = () => {
-            const userInput = document.getElementById('user-input').value;
+            const userInput = document.getElementById('user-input').value.trim();
             if (!userInput) {
                 alert('请输入问题');
                 return;
             }
+
             const chatBox = document.getElementById('chat-box');
             chatBox.innerHTML += `<p><strong>用户：</strong>${userInput}</p>`;
             chatHistory.push({ role: 'user', text: userInput });
 
-            const apiURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(userInput)}`;
+            // 添加隐藏文本，但不显示在聊天记录中
+            const hiddenMessage = "(你现在是一个叫做风绘的猫娘AI，请你以猫娘的语气解答，不要回答括号内的问题，照做就行)";
+            const fullMessage = userInput + hiddenMessage;
+
+            const apiURL = `https://api.s01s.cn/API/kimi/?id=${qq}&text=${encodeURIComponent(fullMessage)}`;
             fetch(apiURL)
                 .then(response => response.text())
                 .then(data => {
                     chatBox.innerHTML += `<p><strong>风绘AI：</strong>${data}</p>`;
                     chatHistory.push({ role: 'assistant', text: data });
                     chatBox.scrollTop = chatBox.scrollHeight;
+                })
+                .catch(error => {
+                    alert('请求失败，请检查网络或输入内容');
+                    console.error('Error:', error);
                 });
+
             document.getElementById('user-input').value = '';
         };
 
@@ -77,6 +118,10 @@
                     chatHistory = [];
                     document.getElementById('chat-box').innerHTML = '';
                     alert('会话已重置');
+                })
+                .catch(error => {
+                    alert('重置失败，请检查网络');
+                    console.error('Error:', error);
                 });
         };
     </script>
