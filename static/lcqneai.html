@@ -2,103 +2,44 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeekAI问答</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 500px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .response {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>DeepSeekAI问答</h1>
-        <label for="qq">请输入您的QQ号：</label>
-        <input type="text" id="qqInput" placeholder="请输入您的QQ号">
-        <label for="userInput">输入您的问题：</label>
-        <textarea id="userInput" placeholder="输入您的问题..."></textarea>
-        <button onclick="askAI()">提交问题</button>
-        <div id="response" class="response"></div>
-    </div>
-
+    <title>Kimi对话</title>
     <script>
-        function askAI() {
-            const qq = document.getElementById('qqInput').value;
-            const userInput = document.getElementById('userInput').value;
-            const messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
-                {
-                    "role": "user",
-                    "content": userInput
-                }
-            ];
+        function sendRequest() {
+            var id = document.getElementById("id").value;
+            var text = document.getElementById("text").value;
+            var type = document.getElementById("type").value;
 
-            fetch('https://api.pearktrue.cn/api/deepseek/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ messages: messages, qq: qq })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.code === 200) {
-                    document.getElementById('response').innerText = data.message;
-                } else {
-                    document.getElementById('response').innerText = '获取失败: ' + data.msg;
-                }
-            })
-            .catch(error => {
-                document.getElementById('response').innerText = '请求错误: ' + error;
-            });
+            // 构建请求URL
+            var url = "https://api.s01s.cn/API/kimi/";
+            url += "id=" + encodeURIComponent(id);
+            url += "&text=" + encodeURIComponent(text);
+            url += "&type=" + encodeURIComponent(type);
+
+            // 发送GET请求
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("response").innerText = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
     </script>
+</head>
+<body>
+    <h1>Kimi对话</h1>
+    <label for="id">ID:</label>
+    <input type="text" id="id" required><br><br>
+    <label for="text">问题:</label>
+    <input type="text" id="text"><br><br>
+    <label for="type">类型:</label>
+    <select id="type">
+        <option value="1">提交会话</option>
+        <option value="2">重置会话</option>
+    </select><br><br>
+    <button onclick="sendRequest()">发送</button><br><br>
+    <h2>响应:</h2>
+    <div id="response"></div>
 </body>
 </html>
