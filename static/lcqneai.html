@@ -3,105 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kimi AI Assistant</title>
+    <title>DeepSeek AI Chat</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
         }
-        .container {
+        .chat-container {
             max-width: 600px;
             margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
+            background: white;
             border-radius: 8px;
-            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
-        h1 {
-            text-align: center;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
+        .message {
             margin-bottom: 10px;
-        }
-        button {
-            width: 100%;
             padding: 10px;
-            background-color: #007BFF;
+            border-radius: 5px;
+        }
+        .user-message {
+            align-self: flex-end;
+            background-color: #e1f5fe;
+        }
+        .ai-message {
+            align-self: flex-start;
+            background-color: #e8f5e9;
+        }
+        .input-container {
+            display: flex;
+            margin-top: 20px;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .input-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .response {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            white-space: pre-wrap;
+        .input-container button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Kimi AI Assistant</h1>
-        <textarea id="userInput" placeholder="请输入您的问题..."></textarea>
-        <button onclick="submitQuestion()">提交问题</button>
-        <div class="response" id="responseArea"></div>
+    <div class="chat-container">
+        <div id="chat-log"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
     </div>
 
     <script>
-        async function submitQuestion() {
-            const userInput = document.getElementById('userInput').value.trim();
-            if (!userInput) {
-                alert('请输入问题！');
-                return;
-            }
+        const chatLog = document.getElementById('chat-log');
+        const userInput = document.getElementById('user-input');
 
-            const responseArea = document.getElementById('responseArea');
-            responseArea.innerHTML = '正在加载...';
+        function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
 
-            try {
-                // 替换为你的Kimi API密钥
-                const apiKey = 'sk-PEPtY40cpvyQ7nENrilYmoZsFIha5ZueJrtQjUmFILm2gGW2'; 
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.textContent = userMessage;
+            chatLog.appendChild(messageDiv);
 
-                // 发送请求到Kimi API
-                const response = await fetch('https://api.moonshot.cn/v1/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`  // 使用API密钥
-                    },
-                    body: JSON.stringify({
-                        messages: [
-                            {
-                                role: 'user',
-                                content: userInput
-                            }
-                        ],
-                        response_format: {
-                            type: 'json_object'  // 启用JSON模式
-                        }
-                    })
-                });
+            const messages = [
+                { role: "system", content: "You are a helpful assistant." },
+                { role: "user", content: userMessage }
+            ];
 
-                if (!response.ok) {
-                    throw new Error(`API请求失败，状态码: ${response.status}`);
+            fetch('https://api.pearktrue.cn/api/deepseek/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ messages })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'message ai-message';
+                    aiMessageDiv.textContent = data.message;
+                    chatLog.appendChild(aiMessageDiv);
+                } else {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message';
+                    errorDiv.textContent = 'Error: ' + data.msg;
+                    chatLog.appendChild(errorDiv);
                 }
+            })
+            .catch(error => {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message';
+                errorDiv.textContent = 'Error: ' + error.message;
+                chatLog.appendChild(errorDiv);
+            });
 
-                const data = await response.json();
-                const jsonResponse = JSON.parse(data.message.content);
-
-                // 显示返回的JSON内容
-                responseArea.innerHTML = `<pre>${JSON.stringify(jsonResponse, null, 2)}</pre>`;
-            } catch (error) {
-                // 如果发生错误，显示错误信息
-                responseArea.innerHTML = `<span style="color: red;">错误: ${error.message}</span>`;
-            }
+            userInput.value = '';
+            chatLog.scrollTop = chatLog.scrollHeight;
         }
     </script>
 </body>
