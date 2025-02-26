@@ -42,11 +42,11 @@
 
 ## 推荐码
 
-使用推荐码 **292964461** 注册，可获得额外30积分。
+使用推荐码 **298401074** 注册，可获得额外积分。
 
 ## 官网地址
 
-[简幻欢 - Simpfun · V4](https://simpfun.cn/auth?type=register&code=292964461)
+[简幻欢 - Simpfun · V4](https://simpfun.cn/auth?type=register&code=298401074)
 
 
 *此文未经允许禁止转载*
